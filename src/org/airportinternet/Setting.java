@@ -67,7 +67,6 @@ public class Setting {
 			ret = new ArrayList<Setting>();
 			ret.add(Setting.default1());
 		}
-		Log.d("getSettings", "Returning settings: " + ret);
     	return ret;
     }
 }
