@@ -22,7 +22,7 @@
             android:layout_height="wrap_content"
             android:text="hmhm"
             android:layout_toRightOf="@id/statusLabel"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textAppearance="?android:attr/textAppearanceLarge" />
 
         <Button
             android:id="@+id/button1"
