@@ -15,18 +15,18 @@ import android.util.Log;
 public class Setting {
 	private static final String settingsFILENAME = "settingsMap.obj"; 
 	
-	String name; // Unique
-	String nameserv_addr = null;
-    String topdomain = null;
-    String username = null; // NOT username in iodine sense, UNUSED
-    String password = "";
+	public String name; // Unique
+	public String nameserv_addr = null;
+	public String topdomain = null;
+	public String username = null; // NOT username in iodine sense, UNUSED
+	public String password = "";
     
-    Boolean autodetect_frag_size = true;
-    Integer max_downstream_frag_size = 3072;
-    Boolean raw_mode = true;
-    Boolean lazymode = true;
-    Integer selecttimeout = 4;
-    Integer hostname_maxlen = 0xFF;
+	public Boolean autodetect_frag_size = true;
+	public Integer max_downstream_frag_size = 3072;
+	public Boolean raw_mode = true;
+	public Boolean lazymode = true;
+	public Integer selecttimeout = 4;
+	public Integer hostname_maxlen = 0xFF;
     
     public List<String> cmdarray() {
 		List<String> arr = new LinkedList<String>();
@@ -84,5 +84,22 @@ public class Setting {
 			ret.add(Setting.default1());
 		}
     	return ret;
+    }
+    
+    /**
+     * 
+     * @param settingName
+     * @param c acquired from getApplicationContext()
+     * @return full setting
+     */
+    public static Setting getSettingByName(String settingName, Context c) {
+    	Setting setting = null;
+    	for(Setting s : Setting.getSettings(c)) {
+    		if (s.toString().equals(settingName)) {
+    			setting = s;
+    			break;
+    		}
+    	}
+    	return setting;
     }
 }

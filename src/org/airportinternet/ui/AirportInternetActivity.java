@@ -14,7 +14,7 @@ import android.view.View.OnClickListener;
 
 public class AirportInternetActivity extends Activity {
 	
-	Button btnConnect;
+	Button btnConnect, btnEditSetting;
 	Spinner sp;
 	
     @Override
@@ -22,7 +22,8 @@ public class AirportInternetActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
-        btnConnect = (Button)findViewById(R.id.connectButton);
+        btnConnect = (Button) findViewById(R.id.connectButton);
+        btnEditSetting = (Button) findViewById(R.id.editSettingButton);
         
         sp = ((Spinner)findViewById(R.id.settingsList));
         ArrayAdapter<Setting> adapter = new ArrayAdapter<Setting>(this,
@@ -34,6 +35,7 @@ public class AirportInternetActivity extends Activity {
         sp.setAdapter(adapter);
 
         btnConnect.setOnClickListener(btnConnectListener);
+        btnEditSetting.setOnClickListener(btnEditSettingListener);
     }
     
     private OnClickListener btnConnectListener = new OnClickListener() {
@@ -44,4 +46,15 @@ public class AirportInternetActivity extends Activity {
     		startActivity(st);
         }
     };
+
+    private OnClickListener btnEditSettingListener = new OnClickListener() {
+        public void onClick(View v){
+        	Intent st = new Intent(getApplicationContext(),
+    				EditSettingActivity.class);
+        	st.putExtra("setting", sp.getSelectedItem().toString());
+    		startActivity(st);
+        }
+    };
+
+
 }

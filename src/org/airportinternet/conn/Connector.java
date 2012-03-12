@@ -49,12 +49,8 @@ public abstract class Connector extends Service {
     @Override
     public IBinder onBind(Intent intent) {
     	String settingName = intent.getExtras().getString("setting");
-    	for(Setting s : Setting.getSettings(getApplicationContext())) {
-    		if (s.toString().equals(settingName)) {
-    			setting = s;
-    			break;
-    		}
-    	}
+    	setting = Setting.getSettingByName(settingName,
+    			getApplicationContext());
     	return mMessenger.getBinder();
     }
 
