@@ -18,10 +18,10 @@ public class Setting {
 	String name; // Unique
 	String nameserv_addr = null;
     String topdomain = null;
-    String username = null; // Caution: NOT username in iodine sense
+    String username = null; // NOT username in iodine sense, UNUSED
     String password = "";
     
-    Integer autodetect_frag_size = 1;
+    Boolean autodetect_frag_size = true;
     Integer max_downstream_frag_size = 3072;
     Boolean raw_mode = true;
     Boolean lazymode = true;
@@ -31,7 +31,7 @@ public class Setting {
     public List<String> cmdarray() {
 		List<String> arr = new LinkedList<String>();
 		if (password != null) arr.add("-P " + password);
-		if (autodetect_frag_size == 0)
+		if (autodetect_frag_size)
 			arr.add("-m " + max_downstream_frag_size);
 		if (!raw_mode) arr.add("-r");
 		if (!lazymode) arr.add("-L");
