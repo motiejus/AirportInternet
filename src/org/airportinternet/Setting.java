@@ -111,7 +111,7 @@ public class Setting implements Serializable {
     public boolean save(Context c) {
     	List<Setting> settings = Setting.getSettings(c);
     	boolean create_new = true;
-    	for(int i = 0; i <= settings.size(); i++) {
+    	for(int i = 0; i < settings.size(); i++) {
     		Setting s = settings.get(i);
     		if (s.toString().equals(name)) {
     			settings.set(i, this);
