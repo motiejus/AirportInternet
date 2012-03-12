@@ -29,7 +29,8 @@ public class EditSettingActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
     	super.onCreate(savedInstanceState);
     	setContentView(R.layout.editsetting);
-
+    	saveSettingBtn = (Button) findViewById(R.id.saveSettingButton);
+    	
     	map_fields();
     	
     	String stnName = getIntent().getExtras().getString("setting");
@@ -37,6 +38,7 @@ public class EditSettingActivity extends Activity {
     	setting = Setting.getSettingByName(stnName, getApplicationContext());
     	
     	fill_fields();
+    	saveSettingBtn.setOnClickListener(btnSaveSettingListener);
     }
     
     private void map_fields() {
@@ -73,6 +75,7 @@ public class EditSettingActivity extends Activity {
     
     private void fill_setting() {
     	setting.name = name.getText().toString();
+    	
     }
     
     private OnClickListener btnSaveSettingListener = new OnClickListener() {
