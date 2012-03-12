@@ -27,7 +27,8 @@
             </intent-filter>
         </activity>
         
-        <service android:name=".conn.DumbService"></service>
+        <service android:name=".conn.DumbConnector"></service>
+        <service android:name=".conn.ForkConnector"></service>
     </application>
 
 </manifest>

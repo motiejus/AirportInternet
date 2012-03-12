@@ -36,7 +36,6 @@ public class AirportInternetActivity extends Activity {
         btnConnect.setOnClickListener(btnConnectListener);
     }
     
-    
     private OnClickListener btnConnectListener = new OnClickListener() {
         public void onClick(View v){
         	Intent st = new Intent(getApplicationContext(),

@@ -6,11 +6,11 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.StreamCorruptedException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import android.content.Context;
 import android.util.Log;
-
 
 public class Setting {
 	private static final String settingsFILENAME = "settingsMap.obj"; 
@@ -18,7 +18,7 @@ public class Setting {
 	String name; // Unique
 	String nameserv_addr = null;
     String topdomain = null;
-    String username = null;
+    String username = null; // Caution: NOT username in iodine sense
     String password = "";
     
     Integer autodetect_frag_size = 1;
@@ -27,6 +27,22 @@ public class Setting {
     Boolean lazymode = true;
     Integer selecttimeout = 4;
     Integer hostname_maxlen = 0xFF;
+    
+    public String[] cmdarray() {
+		List<String> arr = new LinkedList<String>();
+		if (password != null) arr.add("-P" + password);
+		if (autodetect_frag_size == 0)
+			arr.add("-m" + max_downstream_frag_size);
+		if (!raw_mode) arr.add("-r");
+		if (!lazymode) arr.add("-L");
+		arr.add("-I" + selecttimeout);
+		arr.add("-M" + hostname_maxlen);
+
+		arr.add(topdomain);
+		if (nameserv_addr != null) arr.add(nameserv_addr);
+		
+		return (String[]) arr.toArray(new String[arr.size()]);
+    }
 
     public static Setting default1() {
     	Setting s = new Setting();

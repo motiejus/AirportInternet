@@ -2,7 +2,7 @@ package org.airportinternet.ui;
 
 import org.airportinternet.R;
 import org.airportinternet.conn.Connector;
-import org.airportinternet.conn.DumbService;
+import org.airportinternet.conn.ForkConnector;
 
 import android.app.Activity;
 import android.content.ComponentName;
@@ -34,7 +34,7 @@ public class ConnectionActivity extends Activity {
     	String stnName = getIntent().getExtras().getString("setting");
     	Log.d("Starting Connection with setting: ", stnName);
     	
-    	Intent serviceIntent = new Intent(this, DumbService.class);
+    	Intent serviceIntent = new Intent(this, ForkConnector.class);
     	serviceIntent.putExtra("setting", stnName);
         bindService(serviceIntent, mConnection, Context.BIND_AUTO_CREATE);
     }
@@ -44,8 +44,8 @@ public class ConnectionActivity extends Activity {
         public void handleMessage(Message msg) {
             switch (msg.what) {
             case Connector.MSG_SET_LOG:
-            	tx.append((String) msg.obj);
-            	Log.d("handleMessage", "append to TextArea: " + msg.obj);
+            	tx.append(msg.obj.toString() + "\n");
+            	Log.d("handle_msg", "append to TextArea: " + msg.obj);
                 break;
             case Connector.MSG_CONNECTED:
             	statusView.setText("Connected");
