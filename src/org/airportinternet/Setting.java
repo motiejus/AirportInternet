@@ -28,20 +28,20 @@ public class Setting {
     Integer selecttimeout = 4;
     Integer hostname_maxlen = 0xFF;
     
-    public String[] cmdarray() {
+    public List<String> cmdarray() {
 		List<String> arr = new LinkedList<String>();
-		if (password != null) arr.add("-P" + password);
+		if (password != null) arr.add("-P " + password);
 		if (autodetect_frag_size == 0)
-			arr.add("-m" + max_downstream_frag_size);
+			arr.add("-m " + max_downstream_frag_size);
 		if (!raw_mode) arr.add("-r");
 		if (!lazymode) arr.add("-L");
-		arr.add("-I" + selecttimeout);
-		arr.add("-M" + hostname_maxlen);
+		arr.add("-I " + selecttimeout);
+		arr.add("-M " + hostname_maxlen);
 
 		arr.add(topdomain);
 		if (nameserv_addr != null) arr.add(nameserv_addr);
 		
-		return (String[]) arr.toArray(new String[arr.size()]);
+		return arr;
     }
 
     public static Setting default1() {
