@@ -22,12 +22,14 @@ import android.widget.TextView;
 public class ConnectionActivity extends Activity {
 	
 	EditText tx; // TextArea with everything
+	TextView statusView;
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
     	super.onCreate(savedInstanceState);
     	setContentView(R.layout.status);
     	tx = (EditText)findViewById(R.id.editText1);
+    	statusView = (TextView)findViewById(R.id.statusView);
     	
     	String stnName = getIntent().getExtras().getString("setting");
     	Log.d("Starting Connection with setting: ", stnName);
@@ -45,6 +47,18 @@ public class ConnectionActivity extends Activity {
             	tx.append((String) msg.obj);
             	Log.d("handleMessage", "append to TextArea: " + msg.obj);
                 break;
+            case Connector.MSG_CONNECTED:
+            	statusView.setText("Connected");
+            	statusView.setTextColor(android.graphics.Color.GREEN);
+            	break;
+            case Connector.MSG_CONNECTING:
+            	statusView.setText("Connecting");
+            	statusView.setTextColor(android.graphics.Color.LTGRAY);
+            	break;
+            case Connector.MSG_DISCONNECTED:
+            	statusView.setText("Disconnected");
+            	statusView.setTextColor(android.graphics.Color.RED);
+            	break;
             default:
             	Log.d("handleMessage", "got unknown message: " + msg);
                 super.handleMessage(msg);

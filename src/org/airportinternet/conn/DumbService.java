@@ -1,6 +1,9 @@
 package org.airportinternet.conn;
 
+import org.airportinternet.Setting;
+
 import android.os.Handler;
+import android.util.Log;
 
 public class DumbService extends Connector {
 
@@ -14,13 +17,21 @@ public class DumbService extends Connector {
 	}
 
 	@Override
-	public void start() {
-		mHandler.post(poller);
+	public void start(Setting setting) {
+		Log.d("start", "Starting connection to " + setting);
+		connecting();
+		mHandler.postDelayed(poller, 2000);
 	}
 	
 	private Runnable poller = new Runnable() {
 		public void run() {
-			sendObject("Tick " + ++tick + "\n");
+			if (tick % 6 == 4)
+				disconnected();
+			else if (tick % 6 == 5)
+				connecting();
+			else
+				connected();
+			sendLog("Tick " + ++tick + "\n");
     		if (running) mHandler.postDelayed(this, 1000);
 		}
 	};

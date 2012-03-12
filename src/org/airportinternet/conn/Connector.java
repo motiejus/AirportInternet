@@ -1,5 +1,7 @@
 package org.airportinternet.conn;
 
+import org.airportinternet.Setting;
+
 import android.app.Service;
 import android.content.Intent;
 import android.os.Handler;
@@ -9,17 +11,21 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.util.Log;
 
-public abstract class Connector extends Service {	
+public abstract class Connector extends Service {
+    public static final int MSG_CONNECTING = 5;
+    public static final int MSG_DISCONNECTED = 4;
+	public static final int MSG_CONNECTED = 3;
     public static final int MSG_SET_LOG = 2;
     public static final int MSG_REGISTER_CLIENT = 1;
     
 	private Messenger client;
+	private Setting setting;
 	
 	/*
 	 * This is called when communication with Activity is started
 	 * and it's safe to send messages to the activity
 	 */
-	protected abstract void start();
+	protected abstract void start(Setting setting);
 	
 	// Target we publish for clients to send messages to IncomingHandler
     private final Messenger mMessenger = new Messenger(
@@ -31,7 +37,7 @@ public abstract class Connector extends Service {
     				case MSG_REGISTER_CLIENT:
     					Log.d("handleMessage", "registering new client");
     					client = msg.replyTo;
-    					start();
+    					start(setting);
     					break;
     				default:
     					Log.d("handleMessage", "passing msg to parent");
@@ -42,14 +48,46 @@ public abstract class Connector extends Service {
     );
     @Override
     public IBinder onBind(Intent intent) {
-        return mMessenger.getBinder();
+    	String settingName = intent.getExtras().getString("setting");
+    	for(Setting s : Setting.getSettings(getApplicationContext())) {
+    		if (s.toString().equals(settingName)) {
+    			setting = s;
+    			break;
+    		}
+    	}
+    	return mMessenger.getBinder();
     }
 
-	protected void sendObject(Object message) { // Called from worker thread
+	protected void sendLog(String message) { // Called from worker thread
 		Message msg = Message.obtain();
 		msg.obj = message;
 		msg.what = MSG_SET_LOG;
 		try { // Could not send Object to UI.. UI crashed?
+			client.send(msg);
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
+	}
+
+	protected void connecting() {
+		sendStatusNotification(MSG_CONNECTING);
+	}
+	
+	protected void connected() {
+		sendStatusNotification(MSG_CONNECTED);
+	}
+	
+	protected void disconnected() {
+		sendStatusNotification(MSG_DISCONNECTED);
+	}
+	
+	/**
+	 * called from Worker thread after connection is established
+	 */
+	protected void sendStatusNotification(int notification) {
+		Message msg = Message.obtain();
+		msg.what = notification;
+		try {
 			client.send(msg);
 		} catch (RemoteException e) {
 			e.printStackTrace();
