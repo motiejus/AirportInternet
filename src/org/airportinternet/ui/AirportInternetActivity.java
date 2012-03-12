@@ -18,9 +18,15 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.util.Log;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.Spinner;
+import android.view.View;
+import android.view.View.OnClickListener;
 
 public class AirportInternetActivity extends Activity {
+	
+	Button btnConnect;
+	Spinner sp;
 	
     Messenger mService = null;
     final Messenger mMessenger = new Messenger(new IncomingHandler());
@@ -55,7 +61,9 @@ public class AirportInternetActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
-        Spinner sp = ((Spinner)findViewById(R.id.settingsList));
+        btnConnect = (Button)findViewById(R.id.connectButton);
+        
+        sp = ((Spinner)findViewById(R.id.settingsList));
         ArrayAdapter<Setting> adapter = new ArrayAdapter<Setting>(this,
         		android.R.layout.simple_spinner_item,
                 Setting.getSettings(getApplicationContext()));
@@ -64,11 +72,22 @@ public class AirportInternetActivity extends Activity {
         		android.R.layout.simple_spinner_dropdown_item);
         sp.setAdapter(adapter);
 
+        
+        btnConnect.setOnClickListener(btnConnectListener);
+        
         bindService(new Intent(this, DumbService.class), mConnection,
         		Context.BIND_AUTO_CREATE);
-       
     }
     
+    
+    private OnClickListener btnConnectListener = new OnClickListener() {
+        public void onClick(View v){
+        	Intent st = new Intent(getApplicationContext(),
+    				ConnectionActivity.class);
+        	st.putExtra("setting", sp.getSelectedItem().toString());
+    		startActivity(st);
+        }
+    };
     
     class IncomingHandler extends Handler {
         @Override
