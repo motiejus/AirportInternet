@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.io.StreamCorruptedException;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -14,7 +15,9 @@ import java.util.List;
 import android.content.Context;
 import android.util.Log;
 
-public class Setting {
+public class Setting implements Serializable {
+	private static final long serialVersionUID = -6098662810516025032L;
+
 	private static final String settingsFILENAME = "settingsMap.obj"; 
 	
 	public String name; // Unique
