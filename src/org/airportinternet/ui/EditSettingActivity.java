@@ -61,9 +61,10 @@ public class EditSettingActivity extends Activity {
     	nameserv_addr.setText(setting.nameserv_addr);
     	topdomain.setText(setting.topdomain);
     	password.setText(setting.password);
-    	//max_downstream_frag_size.setText(setting.max_downstream_frag_size);
-    	//selecttimeout.setText(setting.selecttimeout);
-    	//hostname_maxlen.setText(setting.hostname_maxlen);
+    	max_downstream_frag_size.setText(
+    			String.valueOf(setting.max_downstream_frag_size));
+    	selecttimeout.setText(String.valueOf(setting.selecttimeout));
+    	hostname_maxlen.setText(String.valueOf(setting.hostname_maxlen));
     	
     	autodetect_frag_size.setChecked(setting.autodetect_frag_size);
     	raw_mode.setChecked(setting.raw_mode);
