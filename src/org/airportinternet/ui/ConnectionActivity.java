@@ -1,5 +1,6 @@
 package org.airportinternet.ui;
 
+import org.airportinternet.R;
 import org.airportinternet.conn.Connector;
 import org.airportinternet.conn.DumbService;
 
@@ -15,23 +16,33 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
 import android.util.Log;
+import android.widget.EditText;
+import android.widget.TextView;
 
 public class ConnectionActivity extends Activity {
+	
+	EditText tx; // TextArea with everything
+	
     @Override
     public void onCreate(Bundle savedInstanceState) {
     	super.onCreate(savedInstanceState);
+    	setContentView(R.layout.status);
+    	tx = (EditText)findViewById(R.id.editText1);
+    	
     	String stnName = getIntent().getExtras().getString("setting");
-    	Log.d("Setting name", stnName);
-        bindService(new Intent(this, DumbService.class), mConnection,
-        		Context.BIND_AUTO_CREATE);
+    	Log.d("Starting Connection with setting: ", stnName);
+    	
+    	Intent serviceIntent = new Intent(this, DumbService.class);
+    	serviceIntent.putExtra("setting", stnName);
+        bindService(serviceIntent, mConnection, Context.BIND_AUTO_CREATE);
     }
-    
     
     class IncomingHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
             case Connector.MSG_SET_LOG:
+            	tx.append((String) msg.obj);
             	Log.d("handleMessage", "append to TextArea: " + msg.obj);
                 break;
             default:
@@ -66,7 +77,4 @@ public class ConnectionActivity extends Activity {
             Log.w("disconnect", "Service unexpectedly disconnected");
         }
     };
-
-
-    
 }
