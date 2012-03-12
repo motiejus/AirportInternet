@@ -28,34 +28,6 @@ public class AirportInternetActivity extends Activity {
 	Button btnConnect;
 	Spinner sp;
 	
-    Messenger mService = null;
-    final Messenger mMessenger = new Messenger(new IncomingHandler());
-	
-    private ServiceConnection mConnection = new ServiceConnection() {
-        public void onServiceConnected(ComponentName className, IBinder serv) {
-            mService = new Messenger(serv);
-            try {
-                Message msg = Message.obtain(null,
-                		Connector.MSG_REGISTER_CLIENT);
-                msg.replyTo = mMessenger;
-                mService.send(msg);
-            } catch (RemoteException e) {
-            	Log.w("RegisterClient", "Failed");
-            	// In this case the service has crashed
-            	// before we could even do anything with it
-            }
-        }
-
-        public void onServiceDisconnected(ComponentName className) {
-            // This is called when the connection with the service has been
-        	//unexpectedly disconnected - process crashed.
-            mService = null;
-            Log.w("disconnect", "Service unexpectedly disconnected");
-        }
-    };
-
-	
-    /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,9 +46,6 @@ public class AirportInternetActivity extends Activity {
 
         
         btnConnect.setOnClickListener(btnConnectListener);
-        
-        bindService(new Intent(this, DumbService.class), mConnection,
-        		Context.BIND_AUTO_CREATE);
     }
     
     
@@ -88,19 +57,4 @@ public class AirportInternetActivity extends Activity {
     		startActivity(st);
         }
     };
-    
-    class IncomingHandler extends Handler {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-            case Connector.MSG_SET_LOG:
-            	Log.d("handleMessage", "append to TextArea: " + msg.obj);
-                break;
-            default:
-            	Log.d("handleMessage", "got unknown message: " + msg);
-                super.handleMessage(msg);
-            }
-        }
-    }
-
 }
