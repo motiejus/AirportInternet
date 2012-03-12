@@ -34,7 +34,8 @@ public class AirportInternetActivity extends Activity {
                 msg.replyTo = mMessenger;
                 mService.send(msg);
             } catch (RemoteException e) {
-                // In this case the service has crashed
+            	Log.w("RegisterClient", "Failed");
+            	// In this case the service has crashed
             	// before we could even do anything with it
             }
         }
@@ -65,6 +66,7 @@ public class AirportInternetActivity extends Activity {
 
         bindService(new Intent(this, DumbService.class), mConnection,
         		Context.BIND_AUTO_CREATE);
+       
     }
     
     
@@ -73,9 +75,10 @@ public class AirportInternetActivity extends Activity {
         public void handleMessage(Message msg) {
             switch (msg.what) {
             case Connector.MSG_SET_LOG:
-            	Log.d("handleMessage", "append to TextArea: " + msg.getData());
+            	Log.d("handleMessage", "append to TextArea: " + msg.obj);
                 break;
             default:
+            	Log.d("handleMessage", "got unknown message: " + msg);
                 super.handleMessage(msg);
             }
         }

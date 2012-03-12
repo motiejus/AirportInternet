@@ -14,7 +14,7 @@ public class DumbService extends Connector {
 	}
 
 	@Override
-	public void onCreate() {
+	public void start() {
 		mHandler.post(poller);
 	}
 	
