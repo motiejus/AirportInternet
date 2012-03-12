@@ -13,7 +13,7 @@
             android:id="@+id/cancelSettingButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Button" />
+            android:text="Cancel" />
 
         <Button
             android:id="@+id/saveSettingButton"
