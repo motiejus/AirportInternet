@@ -4,9 +4,15 @@ import org.airportinternet.R;
 import org.airportinternet.Setting;
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 public class EditSettingActivity extends Activity {
@@ -17,6 +23,7 @@ public class EditSettingActivity extends Activity {
 		max_downstream_frag_size, selecttimeout, hostname_maxlen;
 	private ToggleButton autodetect_frag_size, raw_mode, lazymode;
 	
+	private Button saveSettingBtn; 
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -62,4 +69,22 @@ public class EditSettingActivity extends Activity {
     	raw_mode.setChecked(setting.raw_mode);
     	lazymode.setChecked(setting.lazymode);
     }
+    
+    private void fill_setting() {
+    	setting.name = name.getText().toString();
+    }
+    
+    private OnClickListener btnSaveSettingListener = new OnClickListener() {
+        public void onClick(View v) {
+        	Context c = getApplicationContext();
+        	
+        	fill_setting();
+        	if (setting.save(c)) {
+        		Toast.makeText(c, "Failed to save setting", Toast.LENGTH_LONG);
+        	} else {
+        		Toast.makeText(c, "Saved.\nTODO: back", Toast.LENGTH_LONG);
+        	}
+        }
+    };
+
 }

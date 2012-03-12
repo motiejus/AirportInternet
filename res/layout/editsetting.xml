@@ -8,25 +8,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal" >
-
-        <Button
-            android:id="@+id/cancelSettingButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Cancel" />
-
         <Button
             android:id="@+id/saveSettingButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Save" />
-
-        <Button
-            android:id="@+id/saveAsSettingButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Save As" />
-
     </LinearLayout>
 
     <TableLayout

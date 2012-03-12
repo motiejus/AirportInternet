@@ -2,8 +2,10 @@ package org.airportinternet;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.StreamCorruptedException;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -101,5 +103,55 @@ public class Setting {
     		}
     	}
     	return setting;
+    }
+    
+    public boolean save(Context c) {
+    	List<Setting> settings = Setting.getSettings(c);
+    	boolean create_new = true;
+    	for(int i = 0; i <= settings.size(); i++) {
+    		Setting s = settings.get(i);
+    		if (s.toString().equals(name)) {
+    			settings.set(i, this);
+    			create_new = false;
+    			break;
+    		}
+    	}
+    	if (!create_new)
+    		settings.add(this);
+
+    	return Setting.save_settings_arr(settings, c);
+    }
+    
+    public static boolean save_settings_arr(List<Setting> settings, Context c) {
+		FileOutputStream fos;
+		ObjectOutputStream serializer;
+		
+		try {
+			fos = c.openFileOutput(settingsFILENAME, Context.MODE_PRIVATE);
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			Log.e("save_settings_arr", "Could not open objfile for writing");
+			e.printStackTrace();
+			return false;
+		}
+		
+		try {
+			serializer = new ObjectOutputStream(fos);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			Log.e("save_settings_arr", "Could not create serializer");
+			e.printStackTrace();
+			return false;
+		}
+		
+		try {
+			serializer.writeObject(settings);
+		} catch (IOException e) {
+			Log.e("save_settings_arr", "Failed to write settings array");
+			e.printStackTrace();
+			return false;
+		}
+		
+    	return true;
     }
 }
