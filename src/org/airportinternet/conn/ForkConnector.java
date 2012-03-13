@@ -56,7 +56,7 @@ public class ForkConnector extends Connector {
 			
 			try {
 				while (in.ready())
-					while((cnt = in.read(buf)) != -1) {
+					if((cnt = in.read(buf)) != -1) {
 						ret.append(buf, 0, cnt);
 					}
 			} catch (IOException e) {
