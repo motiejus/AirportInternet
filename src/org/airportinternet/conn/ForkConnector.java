@@ -33,8 +33,7 @@ public class ForkConnector extends Connector {
 
 		List<String> cmdc = s.cmdarray();
 		cmdc.add(0, IODINE_PATH);
-		Log.d("CommandLine", cmdc.toString());
-
+		Log.d("CommandLine", cmdc.toString() + "; size: " + cmdc.size());
 		try {
 			proc = new ProcessBuilder(cmdc).redirectErrorStream(true).start();
 			connecting();

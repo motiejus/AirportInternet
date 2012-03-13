@@ -56,16 +56,17 @@ public class Setting implements Serializable {
 	
     public List<String> cmdarray() {
 		List<String> arr = new LinkedList<String>();
-		if (password != null) arr.add("-P " + password);
+		if (password != null) arr.add("-P" + password);
 		if (autodetect_frag_size)
-			arr.add("-m " + max_downstream_frag_size);
+			arr.add("-m" + max_downstream_frag_size);
 		if (!raw_mode) arr.add("-r");
 		if (!lazymode) arr.add("-L");
-		arr.add("-I " + selecttimeout);
-		arr.add("-M " + hostname_maxlen);
-
+		arr.add("-I" + selecttimeout);
+		arr.add("-M" + hostname_maxlen);
+		arr.add("-f");
 		arr.add(topdomain);
-		if (nameserv_addr != null) arr.add(nameserv_addr);
+		if (nameserv_addr != null && !nameserv_addr.equals(""))
+			arr.add(nameserv_addr);
 		
 		return arr;
     }
