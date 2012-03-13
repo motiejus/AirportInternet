@@ -6,12 +6,12 @@
 
     <Spinner
         android:id="@+id/settingsList"
-        android:layout_width="match_parent"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content" />
 
     <LinearLayout
         android:id="@+id/linearLayout1"
-        android:layout_width="match_parent"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         >
