@@ -65,6 +65,12 @@ public abstract class Connector extends Service {
 		stop();
 	}
 	
+	@Override
+	public boolean onUnbind(Intent i) {
+		client = null;
+		return false;
+	}
+	
 	// Target we publish for clients to send messages to IncomingHandler
     private final Messenger mMessenger = new Messenger(
     		new Handler() {
@@ -127,30 +133,34 @@ public abstract class Connector extends Service {
      * Called from Connector when message was received from iodine
      */
 	protected void sendLog(String message) {
-		Message msg = Message.obtain();
-		msg.obj = message;
-		msg.what = MSG_SET_LOG;
-		try { // Could not send Object to UI.. UI crashed?
-			client.send(msg);
-		} catch (RemoteException e) {
-			e.printStackTrace();
+		if (client != null) {
+			Message msg = Message.obtain();
+			msg.obj = message;
+			msg.what = MSG_SET_LOG;
+			try { // Could not send Object to UI.. UI crashed?
+				client.send(msg);
+			} catch (RemoteException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
 	private void sendStatusToActivity() {
-		int notification = MSG_DISCONNECTED;
-		switch (status) {
-		case STATUS_CONNECTED: notification = MSG_CONNECTED; break;
-		case STATUS_CONNECTING: notification = MSG_CONNECTING; break;
-		case STATUS_DISCONNECTED: notification = MSG_DISCONNECTED; break;
-		}
-		
-		Message msg = Message.obtain();
-		msg.what = notification;
-		try {
-			client.send(msg);
-		} catch (RemoteException e) {
-			e.printStackTrace();
+		if (client != null) {
+			int notification = MSG_DISCONNECTED;
+			switch (status) {
+			case STATUS_CONNECTED: notification = MSG_CONNECTED; break;
+			case STATUS_CONNECTING: notification = MSG_CONNECTING; break;
+			case STATUS_DISCONNECTED: notification = MSG_DISCONNECTED; break;
+			}
+
+			Message msg = Message.obtain();
+			msg.what = notification;
+			try {
+				client.send(msg);
+			} catch (RemoteException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
