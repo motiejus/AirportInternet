@@ -12,7 +12,8 @@ import android.os.RemoteException;
 import android.util.Log;
 
 public abstract class Connector extends Service {
-    public static final int MSG_CONNECTING = 5;
+	public static final int MSG_ACTION_DISCONNECT = 6;
+	public static final int MSG_CONNECTING = 5;
     public static final int MSG_DISCONNECTED = 4;
 	public static final int MSG_CONNECTED = 3;
     public static final int MSG_SET_LOG = 2;
@@ -27,6 +28,11 @@ public abstract class Connector extends Service {
 	 */
 	protected abstract void start(Setting setting);
 	protected abstract void stop();
+
+	/* If activity is/should be running */
+	protected boolean running = false,
+			/* If we are actually connected to server */
+			connected = false;
 	
 	@Override
 	public void onDestroy() {
@@ -35,7 +41,6 @@ public abstract class Connector extends Service {
 	
 	// Target we publish for clients to send messages to IncomingHandler
     private final Messenger mMessenger = new Messenger(
-			// Handler of incoming messages from clients
     		new Handler() {
     			@Override
     			public void handleMessage(Message msg) {
@@ -43,7 +48,13 @@ public abstract class Connector extends Service {
     				case MSG_REGISTER_CLIENT:
     					Log.d("handleMessage", "registering new client");
     					client = msg.replyTo;
-    					start(setting);
+    					if (!running)
+    						start(setting);
+    					break;
+    				case MSG_ACTION_DISCONNECT:
+    					Log.d("handleMessage", "Got disconnect request");
+    					stop();
+    					stopSelf();
     					break;
     				default:
     					Log.d("handleMessage", "passing msg to parent");
@@ -52,11 +63,17 @@ public abstract class Connector extends Service {
     			}
     		}
     );
+
     @Override
-    public IBinder onBind(Intent intent) {
+    public int onStartCommand(Intent intent, int flags, int startid) {
     	String settingName = intent.getExtras().getString("setting");
     	setting = Setting.getSettingByName(settingName,
     			getApplicationContext());
+    	return START_FLAG_REDELIVERY;
+    }
+    
+    @Override
+    public IBinder onBind(Intent intent) {
     	return mMessenger.getBinder();
     }
 

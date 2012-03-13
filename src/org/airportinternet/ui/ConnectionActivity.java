@@ -41,6 +41,8 @@ public class ConnectionActivity extends Activity {
     	
     	Intent serviceIntent = new Intent(this, ForkConnector.class);
     	serviceIntent.putExtra("setting", stnName);
+    	
+    	startService(serviceIntent);
         bindService(serviceIntent, mConnection, Context.BIND_AUTO_CREATE);
         
         btnStop.setOnClickListener(btnStopListener);
@@ -98,10 +100,17 @@ public class ConnectionActivity extends Activity {
             Log.w("disconnect", "Service unexpectedly disconnected");
         }
     };
-    
 
     private OnClickListener btnStopListener = new OnClickListener() {
 		public void onClick(View v) {
+            Message msg = Message.obtain(null, Connector.MSG_ACTION_DISCONNECT);
+			try {
+				mService.send(msg);
+			} catch (RemoteException e) {
+				Log.d("btnStop", "Failed to send Stop Request to service, " +
+						"probably it's dead already");
+				e.printStackTrace();
+			}
 			finish();
 		}
     };

@@ -17,6 +17,7 @@ import android.widget.Toast;
 public class ForkConnector extends Connector {
 	private static final String IODINE_PATH =
 			"/data/data/org.airportinternet/iodine";
+
 	private Handler mHandler = new Handler();
 
 	private Setting s;
@@ -25,10 +26,6 @@ public class ForkConnector extends Connector {
 
 	private StringBuilder fullLog = new StringBuilder();
 	
-	/* If activity is/should be running */
-	private boolean running = true,
-			/* If we are actually connected to server */
-			connected = false;
 	private List<String> cmdc;
 	
 	/*
@@ -69,6 +66,7 @@ public class ForkConnector extends Connector {
 			watchdogLock.unlock();
 		}
 		mHandler.post(poller);
+		running = true;
 	}
 
 	private Runnable poller = new Runnable() {
@@ -127,6 +125,8 @@ public class ForkConnector extends Connector {
 			} catch (InterruptedException e) {
 				e.printStackTrace(); // shouldn't ever happen
 			}
+			
+			Log.d("watchdog", "watchdog stopped");
 		}
 	};
 }
