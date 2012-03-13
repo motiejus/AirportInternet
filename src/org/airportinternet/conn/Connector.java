@@ -12,11 +12,27 @@ import android.os.RemoteException;
 import android.util.Log;
 
 public abstract class Connector extends Service {
+	/* 
+	 * Connector sends fullLog:String and connected:boolean to Activity.
+	 * Only when service is newly bound, but was already running
+	 * (so ConnectionActivity can properly update its state)
+	 */
+	public static final int MSG_STATUS_UPDATE = 7;
+	/*
+	 * Activity sends disconnect action to the service
+	 */
 	public static final int MSG_ACTION_DISCONNECT = 6;
+	/*
+	 * Connector sends status updates in real-time to activity
+	 * (connected, connecting, disconnected, update log)
+	 */
 	public static final int MSG_CONNECTING = 5;
     public static final int MSG_DISCONNECTED = 4;
 	public static final int MSG_CONNECTED = 3;
     public static final int MSG_SET_LOG = 2;
+    /*
+     * Activity sends its message handler to Connector
+     */
     public static final int MSG_REGISTER_CLIENT = 1;
     
 	private Messenger client;
@@ -77,7 +93,10 @@ public abstract class Connector extends Service {
     	return mMessenger.getBinder();
     }
 
-	protected void sendLog(String message) { // Called from worker thread
+    /**
+     * Called from Connector when message was received from iodine
+     */
+	protected void sendLog(String message) {
 		Message msg = Message.obtain();
 		msg.obj = message;
 		msg.what = MSG_SET_LOG;
@@ -88,14 +107,15 @@ public abstract class Connector extends Service {
 		}
 	}
 
+	/**
+	 * called from Connector on various events (status updates)
+	 */
 	protected void connecting() {
 		sendStatusNotification(MSG_CONNECTING);
 	}
-	
 	protected void connected() {
 		sendStatusNotification(MSG_CONNECTED);
 	}
-	
 	protected void disconnected() {
 		sendStatusNotification(MSG_DISCONNECTED);
 	}
