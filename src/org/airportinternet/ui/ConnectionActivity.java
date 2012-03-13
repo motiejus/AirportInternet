@@ -44,7 +44,7 @@ public class ConnectionActivity extends Activity {
         public void handleMessage(Message msg) {
             switch (msg.what) {
             case Connector.MSG_SET_LOG:
-            	tx.append(msg.obj.toString() + "\n");
+            	tx.append(msg.obj.toString());
             	Log.d("handle_msg", "append to TextArea: " + msg.obj);
                 break;
             case Connector.MSG_CONNECTED:
