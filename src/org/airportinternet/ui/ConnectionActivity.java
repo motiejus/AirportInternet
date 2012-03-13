@@ -16,6 +16,9 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
 import android.util.Log;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -23,6 +26,7 @@ public class ConnectionActivity extends Activity {
 	
 	EditText tx; // TextArea with everything
 	TextView statusView;
+	Button btnStop;
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -30,6 +34,7 @@ public class ConnectionActivity extends Activity {
     	setContentView(R.layout.status);
     	tx = (EditText)findViewById(R.id.editText1);
     	statusView = (TextView)findViewById(R.id.statusView);
+    	btnStop = (Button)findViewById(R.id.stopButton);
     	
     	String stnName = getIntent().getExtras().getString("setting");
     	Log.d("Starting Connection with setting: ", stnName);
@@ -37,6 +42,8 @@ public class ConnectionActivity extends Activity {
     	Intent serviceIntent = new Intent(this, ForkConnector.class);
     	serviceIntent.putExtra("setting", stnName);
         bindService(serviceIntent, mConnection, Context.BIND_AUTO_CREATE);
+        
+        btnStop.setOnClickListener(btnStopListener);
     }
     
     class IncomingHandler extends Handler {
@@ -90,5 +97,12 @@ public class ConnectionActivity extends Activity {
             mService = null;
             Log.w("disconnect", "Service unexpectedly disconnected");
         }
+    };
+    
+
+    private OnClickListener btnStopListener = new OnClickListener() {
+		public void onClick(View v) {
+			finish();
+		}
     };
 }

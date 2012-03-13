@@ -4,6 +4,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.List;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.airportinternet.Setting;
 
@@ -23,6 +26,14 @@ public class ForkConnector extends Connector {
 	private StringBuilder fullLog = new StringBuilder();
 	
 	private boolean running = true, connected = false;
+	private List<String> cmdc;
+	
+	/*
+	 * We want to assign buffered readers and stuff only after watchdog 
+	 * starts the process and starts monitoring it
+	 */
+	private Lock watchdogLock = new ReentrantLock();
+	private Condition watchdogCond = watchdogLock.newCondition();
 	
 	/*
 	 * Refresh UI every 100ms before "connected", every 1000ms when connected 
@@ -31,28 +42,31 @@ public class ForkConnector extends Connector {
 	
 	@Override
 	public void stop() {
-		running = false;
 		proc.destroy();
+		running = false;
 	}
 	
 	@Override
 	protected void start(Setting setting) {
 		s = setting;
+		fullLog = new StringBuilder();
 
-		List<String> cmdc = s.cmdarray();
+		cmdc = s.cmdarray();
 		cmdc.add(0, IODINE_PATH);
 		Log.d("CommandLine", cmdc.toString() + "; size: " + cmdc.size());
+		watchdog.start();
+		connecting();
+		
+		watchdogLock.lock();
 		try {
-			proc = new ProcessBuilder(cmdc).redirectErrorStream(true).start();
-			connecting();
-			in = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-			mHandler.post(poller);
-		} catch (IOException e) {
-			Toast.makeText(getApplicationContext(),
-					"Failed to start iodine", Toast.LENGTH_SHORT);
+			watchdogCond.await();
+		} catch (InterruptedException e) {
+			// should never happen
 			e.printStackTrace();
-			sendLog("Failed to start iodine");
+		} finally {
+			watchdogLock.unlock();
 		}
+		mHandler.post(poller);
 	}
 
 	private Runnable poller = new Runnable() {
@@ -83,6 +97,34 @@ public class ForkConnector extends Connector {
 				}
 			}
     		if (running) mHandler.postDelayed(this, refreshEvery);
+    		else disconnected();
+		}
+	};
+
+	
+	private Thread watchdog = new Thread() {
+		public void run() {
+			watchdogLock.lock();
+			try {
+				proc = new ProcessBuilder(cmdc).redirectErrorStream(
+						true).start();
+				in = new BufferedReader(new InputStreamReader(
+						proc.getInputStream()));
+			} catch (IOException e) {
+				Toast.makeText(getApplicationContext(),
+						"Failed to start iodine", Toast.LENGTH_SHORT);
+				e.printStackTrace();
+				sendLog("Failed to start iodine");
+			}
+			watchdogCond.signal();
+			watchdogLock.unlock();
+
+			try {
+				proc.waitFor();
+				running = false;
+			} catch (InterruptedException e) {
+				// Manual intentional quit, relax
+			}
 		}
 	};
 }
