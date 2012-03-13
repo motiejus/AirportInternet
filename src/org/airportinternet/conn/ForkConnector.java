@@ -20,8 +20,8 @@ public class ForkConnector extends Connector {
 	private Handler mHandler = new Handler();
 
 	private Setting s;
-	private Process proc;
-	private BufferedReader in;
+	private Process proc = null;
+	private BufferedReader in = null;
 
 	private List<String> cmdc;
 
@@ -51,6 +51,9 @@ public class ForkConnector extends Connector {
 		}
 	}
 	
+	/* Avoiding race condition below */
+	private boolean watchDogStartedTheProcess = false;
+	
 	@Override
 	protected void start(Setting setting) {
 		s = setting;
@@ -61,7 +64,7 @@ public class ForkConnector extends Connector {
 		
 		watchdog = new Thread() {
 			public void run() {
-				Log.d("watchdog", "watchdog started");
+				Log.d("watchdog", "watchdog started, locking watchdogLock");
 				watchdogLock.lock();
 				try {
 					proc = new ProcessBuilder(cmdc).redirectErrorStream(
@@ -72,7 +75,9 @@ public class ForkConnector extends Connector {
 					sendLog("Failed to start iodine");
 					e.printStackTrace();
 				}
+				watchDogStartedTheProcess = true;
 				watchdogCond.signal();
+				Log.d("watchdog", "unlocking watchdogLock");
 				watchdogLock.unlock();
 
 				try {
@@ -89,14 +94,18 @@ public class ForkConnector extends Connector {
 		watchdog.start();
 		connecting();
 		
+		Log.d("ForkConnector:start", "before locking watchdogLock");
 		watchdogLock.lock();
+		Log.d("ForkConnector:start", "locked watchdogLock");
 		try {
-			watchdogCond.await();
+			while(!watchDogStartedTheProcess)
+				watchdogCond.await();
 		} catch (InterruptedException e) {
 			// should never happen
 			e.printStackTrace();
 		} finally {
 			watchdogLock.unlock();
+			Log.d("ForkConnector:start", "unlocked watchdogLock");
 		}
 		running = true;
 		mHandler.post(poller);

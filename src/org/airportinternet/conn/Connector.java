@@ -172,6 +172,7 @@ public abstract class Connector extends Service {
      * Called from Connector when message was received from iodine
      */
 	protected void sendLog(String message) {
+		Log.e("sendLog", message);
 		fullLog.append(message);
 		if (client != null) {
 			Message msg = Message.obtain();
@@ -187,6 +188,7 @@ public abstract class Connector extends Service {
 
 	private void sendStatusToActivity() {
 		/* Send status to notification */
+		Log.d("sendStatusNotification", "Status to activity: " + status);
 		if (client != null) {
 			int notification = MSG_DISCONNECTED;
 			switch (status) {
