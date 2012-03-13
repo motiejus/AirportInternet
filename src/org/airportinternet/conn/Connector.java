@@ -69,6 +69,7 @@ public abstract class Connector extends Service {
 
 	@Override
 	public void onDestroy() {
+		mNM.cancelAll();
 		stop();
 	}
 	
