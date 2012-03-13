@@ -99,11 +99,7 @@ public abstract class Connector extends Service {
 	protected void disconnected() {
 		sendStatusNotification(MSG_DISCONNECTED);
 	}
-	
-	/**
-	 * called from Worker thread after connection is established
-	 */
-	protected void sendStatusNotification(int notification) {
+	private void sendStatusNotification(int notification) {
 		Message msg = Message.obtain();
 		msg.what = notification;
 		try {
