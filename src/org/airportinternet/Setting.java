@@ -139,17 +139,8 @@ public class Setting implements Serializable {
      * @param c Context
      * @return boolean if save was successful
      */
-    public boolean save(Context c) {
-    	boolean create_new = true;
-    	for(int i = 0; i < settingsStrictlyPrivateArray.size(); i++) {
-    		Setting s = settingsStrictlyPrivateArray.get(i);
-    		if (s.toString().equals(name)) {
-    			settingsStrictlyPrivateArray.set(i, this);
-    			create_new = false;
-    			break;
-    		}
-    	}
-    	if (create_new)
+    public boolean save(Context c, boolean save_as) {
+    	if (save_as)
     		settingsStrictlyPrivateArray.add(this);
 
     	return Setting.save_settings_arr(c);

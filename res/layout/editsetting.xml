@@ -8,11 +8,27 @@
         android:layout_height="wrap_content"
             android:orientation="vertical">
             
-        <Button
-            android:id="@+id/saveSettingButton"
+            <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="Save" />
+            android:layout_alignParentBottom="true" >
+
+            <Button
+                android:id="@+id/saveSettingButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Save" >
+            </Button>
+            <Button
+                android:id="@+id/deleteSettingButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Delete" >
+            </Button>
+            
+        </LinearLayout>
 
         <LinearLayout
             android:orientation="vertical"

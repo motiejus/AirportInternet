@@ -72,7 +72,14 @@ public class EditSettingActivity extends Activity {
     	lazymode.setChecked(setting.lazymode);
     }
     
-    private void fill_setting() {
+    /**
+     * Fill this.setting with values from fields
+     * @return true if it's a new setting (save as) or old one
+     */
+    private boolean fill_setting() {
+    	boolean save_as = !setting.name.equals(name.getText().toString());
+    	if (save_as)
+    		setting = new Setting();
     	setting.name = name.getText().toString();
     	setting.nameserv_addr = nameserv_addr.getText().toString();
     	setting.topdomain = topdomain.getText().toString();
@@ -90,14 +97,16 @@ public class EditSettingActivity extends Activity {
     	setting.lazymode = lazymode.isChecked();
     	
     	Log.d("Debug setting", setting.debug());
+    	
+    	return save_as;
     }
     
     private OnClickListener btnSaveSettingListener = new OnClickListener() {
         public void onClick(View v) {
         	Context c = getApplicationContext();
         	
-        	fill_setting();
-        	if (setting.save(c)) {
+        	boolean save_as = fill_setting();
+        	if (setting.save(c, save_as)) {
         		Log.d("saveSettings", "Saved new settings");
         		Toast.makeText(c, "Saved \"" + setting +
         				"\" ("+setting.topdomain+")", Toast.LENGTH_LONG).show();
