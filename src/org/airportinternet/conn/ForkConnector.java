@@ -48,7 +48,6 @@ public class ForkConnector extends Connector {
 	@Override
 	protected void start(Setting setting) {
 		s = setting;
-		fullLog = new StringBuilder();
 
 		cmdc = s.cmdarray();
 		cmdc.add(0, IODINE_PATH);
