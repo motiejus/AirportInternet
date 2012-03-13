@@ -61,7 +61,7 @@ public abstract class Connector extends Service {
 	protected abstract void stop();
 
 	/* If activity is/should be running */
-	protected boolean running = false, terminate = true;
+	protected boolean running = false, terminate = false;
 
 	protected Status status = Status.STATUS_UNKNOWN;
 
@@ -88,8 +88,7 @@ public abstract class Connector extends Service {
     				case MSG_REGISTER_CLIENT:
     					Log.d("Connector:handleMsg", "registering new client");
     					client = msg.replyTo;
-    					if (terminate) {
-    						terminate = false;
+    					if (!terminate) {
     						start(setting);
     					}
     					else {
