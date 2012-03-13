@@ -25,7 +25,10 @@ public class ForkConnector extends Connector {
 
 	private StringBuilder fullLog = new StringBuilder();
 	
-	private boolean running = true, connected = false;
+	/* If activity is/should be running */
+	private boolean running = true,
+			/* If we are actually connected to server */
+			connected = false;
 	private List<String> cmdc;
 	
 	/*
@@ -43,7 +46,6 @@ public class ForkConnector extends Connector {
 	@Override
 	public void stop() {
 		proc.destroy();
-		running = false;
 	}
 	
 	@Override
@@ -123,7 +125,7 @@ public class ForkConnector extends Connector {
 				proc.waitFor();
 				running = false;
 			} catch (InterruptedException e) {
-				// Manual intentional quit, relax
+				e.printStackTrace(); // shouldn't ever happen
 			}
 		}
 	};
