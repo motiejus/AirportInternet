@@ -1,8 +1,13 @@
 package org.airportinternet.conn;
 
 import org.airportinternet.Setting;
+import org.airportinternet.ui.ConnectionActivity;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.IBinder;
@@ -26,9 +31,9 @@ public abstract class Connector extends Service {
 	 */
 	public static final int MSG_STATUS_UPDATE = 7;
 	/*
-	 * Activity sends disconnect action to the service
+	 * Activity sends termination action to the service
 	 */
-	public static final int MSG_ACTION_DISCONNECT = 6;
+	public static final int MSG_ACTION_TERMINATE = 6;
 	/*
 	 * Connector sends status updates in real-time to activity
 	 * (connected, connecting, disconnected, update log)
@@ -56,10 +61,12 @@ public abstract class Connector extends Service {
 	protected abstract void stop();
 
 	/* If activity is/should be running */
-	protected boolean running = false;
+	protected boolean running = false, terminate = true;
 
 	protected Status status = Status.STATUS_UNKNOWN;
-	
+
+	private Handler mHandler = new Handler();
+
 	@Override
 	public void onDestroy() {
 		stop();
@@ -80,8 +87,10 @@ public abstract class Connector extends Service {
     				case MSG_REGISTER_CLIENT:
     					Log.d("Connector:handleMsg", "registering new client");
     					client = msg.replyTo;
-    					if (!running)
+    					if (terminate) {
+    						terminate = false;
     						start(setting);
+    					}
     					else {
     						/* Send status to activity */
         					Message msg2 = Message.obtain();
@@ -97,9 +106,9 @@ public abstract class Connector extends Service {
         					sendStatusToActivity();
     					}
     					break;
-    				case MSG_ACTION_DISCONNECT:
+    				case MSG_ACTION_TERMINATE:
     					Log.d("Connector:handleMsg", "Got disconnect request");
-    					stop();
+    					terminate = true;
     					stopSelf();
     					break;
     				default:
@@ -110,6 +119,12 @@ public abstract class Connector extends Service {
     		}
     );
 
+    private CharSequence contentTitle = "AirportConnect";
+    private CharSequence contentText;
+    private PendingIntent contentIntent;
+	private NotificationManager mNM = null;
+	private Notification notification = null;
+	
     @Override
     public int onStartCommand(Intent intent, int flags, int startid) {
     	String settingName = intent.getExtras().getString("setting");
@@ -121,7 +136,31 @@ public abstract class Connector extends Service {
     	 */
     	setting = setting != null ? setting :
     		Setting.getSettingByName(settingName, getApplicationContext());
+
+    	setUpNotifications();
     	return START_FLAG_REDELIVERY;
+    }
+    
+    private void setUpNotifications() {
+    	String ns = Context.NOTIFICATION_SERVICE;
+    	mNM = (NotificationManager) getSystemService(ns);
+
+    	int icon = android.R.drawable.star_on;
+    	CharSequence tickerText = "Hello";
+    	long when = System.currentTimeMillis();
+
+    	notification = new Notification(icon, tickerText, when);
+
+    	Context c = getApplicationContext();
+    	contentText = status2text();
+    	Intent notificationIntent = new Intent(c, ConnectionActivity.class);
+    	notificationIntent.putExtra("setting", (String)null);
+    	contentIntent = PendingIntent.getActivity(c, 0, notificationIntent,
+    			PendingIntent.FLAG_UPDATE_CURRENT);
+
+    	notification.setLatestEventInfo(c, contentTitle, contentText,
+    			contentIntent);
+    	mNM.notify(1, notification);
     }
     
     @Override
@@ -133,6 +172,7 @@ public abstract class Connector extends Service {
      * Called from Connector when message was received from iodine
      */
 	protected void sendLog(String message) {
+		fullLog.append(message);
 		if (client != null) {
 			Message msg = Message.obtain();
 			msg.obj = message;
@@ -146,6 +186,7 @@ public abstract class Connector extends Service {
 	}
 
 	private void sendStatusToActivity() {
+		/* Send status to notification */
 		if (client != null) {
 			int notification = MSG_DISCONNECTED;
 			switch (status) {
@@ -188,5 +229,24 @@ public abstract class Connector extends Service {
 	protected void disconnected() {
 		status = Status.STATUS_DISCONNECTED;
 		sendStatusToActivity();
+		stop();
+		sendLog("\nRestarting after 5 seconds...\n");
+		if (!terminate) mHandler.postDelayed(restarter, 5000);
+	}
+	private Runnable restarter = new Runnable() {
+		public void run() {
+			if (!terminate)
+				start(setting);
+		}
+	};
+	
+	private String status2text() {
+		String ret = "unknown";
+		switch (status) {
+		case STATUS_CONNECTED: ret = "Connected"; break;
+		case STATUS_CONNECTING: ret = "Connecting"; break;
+		case STATUS_DISCONNECTED: ret = "Disconnected"; break;
+		}
+		return ret;
 	}
 }

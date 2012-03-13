@@ -37,7 +37,8 @@ public class ConnectionActivity extends Activity {
     	btnStop = (Button)findViewById(R.id.stopButton);
     	
     	String stnName = getIntent().getExtras().getString("setting");
-    	Log.d("Starting ConnectionActivity with setting ", stnName);
+    	if (stnName != null)
+    		Log.d("Starting ConnectionActivity with setting ", stnName);
     	
     	Intent serviceIntent = new Intent(this, ForkConnector.class);
     	serviceIntent.putExtra("setting", stnName);
@@ -109,7 +110,7 @@ public class ConnectionActivity extends Activity {
 
     private OnClickListener btnStopListener = new OnClickListener() {
 		public void onClick(View v) {
-            Message msg = Message.obtain(null, Connector.MSG_ACTION_DISCONNECT);
+            Message msg = Message.obtain(null, Connector.MSG_ACTION_TERMINATE);
 			try {
 				mService.send(msg);
 			} catch (RemoteException e) {

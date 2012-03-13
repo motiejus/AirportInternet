@@ -25,7 +25,8 @@ public class ForkConnector extends Connector {
 	private BufferedReader in;
 
 	private List<String> cmdc;
-	
+
+	private Thread watchdog;
 	/*
 	 * We want to assign buffered readers and stuff only after watchdog 
 	 * starts the process and starts monitoring it
@@ -41,6 +42,13 @@ public class ForkConnector extends Connector {
 	@Override
 	public void stop() {
 		proc.destroy();
+		try {
+			watchdog.join();
+		} catch (InterruptedException e) {
+			Log.e("ForkConnector:stop",
+					"Interrupted while waiting for watchdog");
+			e.printStackTrace();
+		}
 	}
 	
 	@Override
@@ -50,6 +58,35 @@ public class ForkConnector extends Connector {
 		cmdc = s.cmdarray();
 		cmdc.add(0, IODINE_PATH);
 		Log.d("CommandLine", cmdc.toString() + "; size: " + cmdc.size());
+		
+		watchdog = new Thread() {
+			public void run() {
+				Log.d("watchdog", "watchdog started");
+				watchdogLock.lock();
+				try {
+					proc = new ProcessBuilder(cmdc).redirectErrorStream(
+							true).start();
+					in = new BufferedReader(new InputStreamReader(
+							proc.getInputStream()));
+				} catch (IOException e) {
+					Toast.makeText(getApplicationContext(),
+							"Failed to start iodine", Toast.LENGTH_SHORT);
+					e.printStackTrace();
+					sendLog("Failed to start iodine");
+				}
+				watchdogCond.signal();
+				watchdogLock.unlock();
+
+				try {
+					proc.waitFor();
+					running = false;
+				} catch (InterruptedException e) {
+					e.printStackTrace(); // shouldn't ever happen
+				}
+				
+				Log.d("watchdog", "watchdog stopped");
+			}
+		};
 		watchdog.start();
 		connecting();
 		
@@ -83,7 +120,6 @@ public class ForkConnector extends Connector {
 			}
 			if (ret.length() > 0) {
 				sendLog(ret.toString());
-				fullLog.append(ret);
 			}
 			if (!isConnected()) {
 				if (fullLog.lastIndexOf("setup complete, ") != -1)
@@ -95,35 +131,6 @@ public class ForkConnector extends Connector {
 			}
     		if (running) mHandler.postDelayed(this, refreshEvery);
     		else disconnected();
-		}
-	};
-
-	
-	private Thread watchdog = new Thread() {
-		public void run() {
-			watchdogLock.lock();
-			try {
-				proc = new ProcessBuilder(cmdc).redirectErrorStream(
-						true).start();
-				in = new BufferedReader(new InputStreamReader(
-						proc.getInputStream()));
-			} catch (IOException e) {
-				Toast.makeText(getApplicationContext(),
-						"Failed to start iodine", Toast.LENGTH_SHORT);
-				e.printStackTrace();
-				sendLog("Failed to start iodine");
-			}
-			watchdogCond.signal();
-			watchdogLock.unlock();
-
-			try {
-				proc.waitFor();
-				running = false;
-			} catch (InterruptedException e) {
-				e.printStackTrace(); // shouldn't ever happen
-			}
-			
-			Log.d("watchdog", "watchdog stopped");
 		}
 	};
 }
