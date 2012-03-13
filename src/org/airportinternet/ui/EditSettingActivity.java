@@ -4,7 +4,6 @@ import org.airportinternet.R;
 import org.airportinternet.Setting;
 
 import android.app.Activity;
-import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
