@@ -19,12 +19,20 @@ public class ForkConnector extends Connector {
 	private Setting s;
 	private Process proc;
 	private BufferedReader in;
+
+	private StringBuilder fullLog = new StringBuilder();
 	
-	private boolean running = true;
+	private boolean running = true, connected = false;
+	
+	/*
+	 * Refresh UI every 100ms before "connected", every 1000ms when connected 
+	 */
+	private int refreshEvery = 100;
 	
 	@Override
-	public void onDestroy() {
+	public void stop() {
 		running = false;
+		proc.destroy();
 	}
 	
 	@Override
@@ -40,7 +48,6 @@ public class ForkConnector extends Connector {
 			in = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 			mHandler.post(poller);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			Toast.makeText(getApplicationContext(),
 					"Failed to start iodine", Toast.LENGTH_SHORT);
 			e.printStackTrace();
@@ -63,8 +70,19 @@ public class ForkConnector extends Connector {
 				ret.append("Read interrupted");
 				e.printStackTrace();
 			}
-			if (ret.length() > 0) sendLog(ret.toString());
-    		if (running) mHandler.postDelayed(this, 1000);
+			if (ret.length() > 0) {
+				sendLog(ret.toString());
+				fullLog.append(ret);
+			}
+			if (!connected) {
+				connected = fullLog.lastIndexOf("setup complete, ") != -1;
+				if (connected) {
+					connected();
+					// TODO: set up routing
+					refreshEvery = 1000;
+				}
+			}
+    		if (running) mHandler.postDelayed(this, refreshEvery);
 		}
 	};
 }

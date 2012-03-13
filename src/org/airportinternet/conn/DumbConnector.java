@@ -12,7 +12,7 @@ public class DumbConnector extends Connector {
 	private boolean running = true;
 	
 	@Override
-	public void onDestroy() {
+	public void stop() {
 		running = false;
 	}
 

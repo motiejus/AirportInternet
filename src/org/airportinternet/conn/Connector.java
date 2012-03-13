@@ -26,6 +26,12 @@ public abstract class Connector extends Service {
 	 * and it's safe to send messages to the activity
 	 */
 	protected abstract void start(Setting setting);
+	protected abstract void stop();
+	
+	@Override
+	public void onDestroy() {
+		stop();
+	}
 	
 	// Target we publish for clients to send messages to IncomingHandler
     private final Messenger mMessenger = new Messenger(
