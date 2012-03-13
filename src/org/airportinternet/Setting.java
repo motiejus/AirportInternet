@@ -32,7 +32,28 @@ public class Setting implements Serializable {
 	public Boolean lazymode = true;
 	public Integer selecttimeout = 4;
 	public Integer hostname_maxlen = 0xFF;
-    
+
+	private static List<Setting> settingsStrictlyPrivateArray = null; 
+	
+    public String debug() {
+    	String ret[] = {
+    			"name: " + name,
+    			"nameserv_addr: " + nameserv_addr,
+    			"topdomain: " + topdomain,
+    			"username: " + username,
+    			"password: " + password,
+    			"autodetect_frag_size: " + autodetect_frag_size.toString(),
+    			"max_downstream_frag_size: " + max_downstream_frag_size
+    				.toString(),
+    			"raw_mode: " + raw_mode.toString(),
+    			"lazy_mode: " + lazymode.toString(),
+    			"selecttimeout: " + selecttimeout.toString(),
+    			"hostname_maxlen: " + hostname_maxlen.toString()
+    	};
+    	return H.join(ret, ", ");
+    }
+
+	
     public List<String> cmdarray() {
 		List<String> arr = new LinkedList<String>();
 		if (password != null) arr.add("-P " + password);
@@ -63,32 +84,34 @@ public class Setting implements Serializable {
     
     @SuppressWarnings("unchecked")
 	public static List<Setting> getSettings(Context context) {
-    	List<Setting> ret = null;
-    	
-    	/* Silently fail if we cannot read previous settings */
-    	try {
-			FileInputStream fis = context.openFileInput(settingsFILENAME);
-			try {
-				ObjectInputStream deserializer = new ObjectInputStream(fis);
-				try {
-					 ret = (List<Setting>)deserializer.readObject();
-				} catch (ClassNotFoundException e) {
-					e.printStackTrace();
-				}
-			} catch (StreamCorruptedException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		} catch (FileNotFoundException e) {
-			Log.i("getSettings", "Settings file not found, using default");
-		}
+    	if (settingsStrictlyPrivateArray == null) {
+    		/* Silently fail if we cannot read previous settings */
+    		try {
+    			FileInputStream fis = context.openFileInput(settingsFILENAME);
+    			try {
+    				ObjectInputStream deserializer = new ObjectInputStream(fis);
+    				try {
+    					settingsStrictlyPrivateArray =
+    							(List<Setting>)deserializer.readObject();
+    				} catch (ClassNotFoundException e) {
+    					e.printStackTrace();
+    				}
+    			} catch (StreamCorruptedException e) {
+    				e.printStackTrace();
+    			} catch (IOException e) {
+    				e.printStackTrace();
+    			}
+    		} catch (FileNotFoundException e) {
+    			Log.i("getSettings", "Settings file not found, using default");
+    		}
 
-		if (ret == null) {
-			ret = new ArrayList<Setting>();
-			ret.add(Setting.default1());
-		}
-    	return ret;
+    		if (settingsStrictlyPrivateArray == null) {
+    			settingsStrictlyPrivateArray = new ArrayList<Setting>();
+    			settingsStrictlyPrivateArray.add(Setting.default1());
+    		}
+    	}
+    	
+    	return settingsStrictlyPrivateArray;
     }
     
     /**
@@ -107,32 +130,43 @@ public class Setting implements Serializable {
     	}
     	return setting;
     }
-    
+
+    /**
+     * Save `this` setting permanently
+     * 
+     * if setting with this name already exists, overwrite the current one
+     * if it doesn't, create a new setting
+     * @param c Context
+     * @return boolean if save was successful
+     */
     public boolean save(Context c) {
-    	List<Setting> settings = Setting.getSettings(c);
     	boolean create_new = true;
-    	for(int i = 0; i < settings.size(); i++) {
-    		Setting s = settings.get(i);
+    	for(int i = 0; i < settingsStrictlyPrivateArray.size(); i++) {
+    		Setting s = settingsStrictlyPrivateArray.get(i);
     		if (s.toString().equals(name)) {
-    			settings.set(i, this);
+    			settingsStrictlyPrivateArray.set(i, this);
     			create_new = false;
     			break;
     		}
     	}
-    	if (!create_new)
-    		settings.add(this);
+    	if (create_new)
+    		settingsStrictlyPrivateArray.add(this);
 
-    	return Setting.save_settings_arr(settings, c);
+    	return Setting.save_settings_arr(c);
     }
     
-    public static boolean save_settings_arr(List<Setting> settings, Context c) {
+    /**
+     * Save settingsStrictlyPrivateArray to file
+     * 
+     * @return boolean if save succeeded
+     */
+    private static boolean save_settings_arr(Context c) {
 		FileOutputStream fos;
 		ObjectOutputStream serializer;
 		
 		try {
 			fos = c.openFileOutput(settingsFILENAME, Context.MODE_PRIVATE);
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			Log.e("save_settings_arr", "Could not open objfile for writing");
 			e.printStackTrace();
 			return false;
@@ -148,13 +182,13 @@ public class Setting implements Serializable {
 		}
 		
 		try {
-			serializer.writeObject(settings);
+			serializer.writeObject(settingsStrictlyPrivateArray);
 		} catch (IOException e) {
 			Log.e("save_settings_arr", "Failed to write settings array");
 			e.printStackTrace();
 			return false;
 		}
-		
     	return true;
     }
+    
 }

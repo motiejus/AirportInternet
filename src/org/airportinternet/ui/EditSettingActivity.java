@@ -5,7 +5,6 @@ import org.airportinternet.Setting;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -25,7 +24,7 @@ public class EditSettingActivity extends Activity {
 	
 	private Button saveSettingBtn; 
 	
-    @Override
+	@Override
     public void onCreate(Bundle savedInstanceState) {
     	super.onCreate(savedInstanceState);
     	setContentView(R.layout.editsetting);
@@ -75,7 +74,22 @@ public class EditSettingActivity extends Activity {
     
     private void fill_setting() {
     	setting.name = name.getText().toString();
+    	setting.nameserv_addr = nameserv_addr.getText().toString();
+    	setting.topdomain = topdomain.getText().toString();
+    	setting.password = password.getText().toString();
     	
+    	setting.max_downstream_frag_size = Integer.valueOf(
+    			max_downstream_frag_size.getText().toString());
+    	setting.selecttimeout = Integer.valueOf(
+    			selecttimeout.getText().toString());
+    	setting.hostname_maxlen = Integer.valueOf(
+    			hostname_maxlen.getText().toString());
+    	
+    	setting.autodetect_frag_size = autodetect_frag_size.isChecked();
+    	setting.raw_mode = raw_mode.isChecked();
+    	setting.lazymode = lazymode.isChecked();
+    	
+    	Log.d("Debug setting", setting.debug());
     }
     
     private OnClickListener btnSaveSettingListener = new OnClickListener() {
@@ -84,9 +98,14 @@ public class EditSettingActivity extends Activity {
         	
         	fill_setting();
         	if (setting.save(c)) {
-        		Toast.makeText(c, "Failed to save setting", Toast.LENGTH_LONG);
+        		Log.d("saveSettings", "Saved new settings");
+        		Toast.makeText(c, "Saved \"" + setting +
+        				"\" ("+setting.topdomain+")", Toast.LENGTH_LONG).show();
+        		finish();
         	} else {
-        		Toast.makeText(c, "Saved.\nTODO: back", Toast.LENGTH_LONG);
+        		Log.w("saveSettings", "Failed to save settings");
+        		Toast.makeText(c, "Failed to save setting",
+        				Toast.LENGTH_LONG).show();
         	}
         }
     };

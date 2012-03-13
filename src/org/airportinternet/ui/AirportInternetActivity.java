@@ -13,9 +13,11 @@ import android.view.View;
 import android.view.View.OnClickListener;
 
 public class AirportInternetActivity extends Activity {
+	public static final int RELOAD_SETTINGS_LIST = 1;
 	
 	Button btnConnect, btnEditSetting;
 	Spinner sp;
+	ArrayAdapter<Setting> spinnerAdapter;
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -26,13 +28,13 @@ public class AirportInternetActivity extends Activity {
         btnEditSetting = (Button) findViewById(R.id.editSettingButton);
         
         sp = ((Spinner)findViewById(R.id.settingsList));
-        ArrayAdapter<Setting> adapter = new ArrayAdapter<Setting>(this,
+        spinnerAdapter = new ArrayAdapter<Setting>(this,
         		android.R.layout.simple_spinner_item,
                 Setting.getSettings(getApplicationContext()));
 
-        adapter.setDropDownViewResource(
+        spinnerAdapter.setDropDownViewResource(
         		android.R.layout.simple_spinner_dropdown_item);
-        sp.setAdapter(adapter);
+        sp.setAdapter(spinnerAdapter);
 
         btnConnect.setOnClickListener(btnConnectListener);
         btnEditSetting.setOnClickListener(btnEditSettingListener);
@@ -52,9 +54,13 @@ public class AirportInternetActivity extends Activity {
         	Intent st = new Intent(getApplicationContext(),
     				EditSettingActivity.class);
         	st.putExtra("setting", sp.getSelectedItem().toString());
-    		startActivity(st);
+    		startActivityForResult(st, 1);
         }
     };
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+    	spinnerAdapter.notifyDataSetChanged();
+    }
 
 }
