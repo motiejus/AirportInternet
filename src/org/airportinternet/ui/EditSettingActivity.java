@@ -22,13 +22,14 @@ public class EditSettingActivity extends Activity {
 		max_downstream_frag_size, selecttimeout, hostname_maxlen;
 	private ToggleButton autodetect_frag_size, raw_mode, lazymode;
 	
-	private Button saveSettingBtn; 
+	private Button saveSettingBtn, deleteSettingBtn; 
 	
 	@Override
     public void onCreate(Bundle savedInstanceState) {
     	super.onCreate(savedInstanceState);
     	setContentView(R.layout.editsetting);
     	saveSettingBtn = (Button) findViewById(R.id.saveSettingButton);
+    	deleteSettingBtn = (Button) findViewById(R.id.deleteSettingButton);
     	
     	map_fields();
     	
@@ -38,6 +39,7 @@ public class EditSettingActivity extends Activity {
     	
     	fill_fields();
     	saveSettingBtn.setOnClickListener(btnSaveSettingListener);
+    	deleteSettingBtn.setOnClickListener(btnDeleteSettingListener);
     }
     
     private void map_fields() {
@@ -103,20 +105,32 @@ public class EditSettingActivity extends Activity {
     
     private OnClickListener btnSaveSettingListener = new OnClickListener() {
         public void onClick(View v) {
-        	Context c = getApplicationContext();
-        	
         	boolean save_as = fill_setting();
-        	if (setting.save(c, save_as)) {
+        	if (setting.save(getApplicationContext(), save_as)) {
         		Log.d("saveSettings", "Saved new settings");
-        		Toast.makeText(c, "Saved \"" + setting +
+        		Toast.makeText(getApplicationContext(), "Saved \"" + setting +
         				"\" ("+setting.topdomain+")", Toast.LENGTH_LONG).show();
         		finish();
         	} else {
         		Log.w("saveSettings", "Failed to save settings");
-        		Toast.makeText(c, "Failed to save setting",
-        				Toast.LENGTH_LONG).show();
+        		Toast.makeText(getApplicationContext(),
+        				"Failed to save setting", Toast.LENGTH_LONG).show();
         	}
         }
+    };
+    
+    private OnClickListener btnDeleteSettingListener = new OnClickListener() {
+    	public void onClick(View v) {
+    		String notif = "Deleted \""+setting+" \" ("+setting.topdomain+")";
+    		if (setting.delete(getApplicationContext())) {
+    			Toast.makeText(getApplicationContext(), notif,
+    					Toast.LENGTH_LONG).show();
+    			finish();
+    		} else {
+    			Toast.makeText(getApplicationContext(), "Failed to delete",
+    					Toast.LENGTH_LONG);
+    		}
+    	}
     };
 
 }

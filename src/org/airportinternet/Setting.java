@@ -147,6 +147,16 @@ public class Setting implements Serializable {
     }
     
     /**
+     * Remove current setting
+     * @param c
+     * @return if setting was successfully deleted
+     */
+    public boolean delete(Context c) {
+    	boolean ret = settingsStrictlyPrivateArray.remove(this);
+    	return ret && Setting.save_settings_arr(c);
+    }
+    
+    /**
      * Save settingsStrictlyPrivateArray to file
      * 
      * @return boolean if save succeeded
