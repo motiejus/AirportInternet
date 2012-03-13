@@ -12,6 +12,13 @@ import android.os.RemoteException;
 import android.util.Log;
 
 public abstract class Connector extends Service {
+	public enum Status {
+		STATUS_UNKNOWN,
+		STATUS_CONNECTING,
+		STATUS_CONNECTED,
+		STATUS_DISCONNECTED
+	};
+	
 	/* 
 	 * Connector sends fullLog:String and connected:boolean to Activity.
 	 * Only when service is newly bound, but was already running
@@ -38,6 +45,9 @@ public abstract class Connector extends Service {
 	private Messenger client;
 	private Setting setting;
 	
+	/* Connector appends to this log */
+	protected StringBuilder fullLog = new StringBuilder();
+	
 	/*
 	 * This is called when communication with Activity is started
 	 * and it's safe to send messages to the activity
@@ -46,9 +56,9 @@ public abstract class Connector extends Service {
 	protected abstract void stop();
 
 	/* If activity is/should be running */
-	protected boolean running = false,
-			/* If we are actually connected to server */
-			connected = false;
+	protected boolean running = false;
+
+	protected Status status = Status.STATUS_UNKNOWN;
 	
 	@Override
 	public void onDestroy() {
@@ -62,13 +72,27 @@ public abstract class Connector extends Service {
     			public void handleMessage(Message msg) {
     				switch (msg.what) {
     				case MSG_REGISTER_CLIENT:
-    					Log.d("handleMessage", "registering new client");
+    					Log.d("Connector:handleMsg", "registering new client");
     					client = msg.replyTo;
     					if (!running)
     						start(setting);
+    					else {
+    						/* Send status to activity */
+        					Message msg2 = Message.obtain();
+        					msg2.what = MSG_STATUS_UPDATE;
+        					msg2.obj = fullLog.toString(); 
+        					try {
+        						client.send(msg2);
+        					} catch (RemoteException e) {
+        						Log.d("Connector:handleMsg",
+        								"Failed to update activity status");
+        						e.printStackTrace();
+        					}
+        					sendStatusToActivity();
+    					}
     					break;
     				case MSG_ACTION_DISCONNECT:
-    					Log.d("handleMessage", "Got disconnect request");
+    					Log.d("Connector:handleMsg", "Got disconnect request");
     					stop();
     					stopSelf();
     					break;
@@ -107,19 +131,14 @@ public abstract class Connector extends Service {
 		}
 	}
 
-	/**
-	 * called from Connector on various events (status updates)
-	 */
-	protected void connecting() {
-		sendStatusNotification(MSG_CONNECTING);
-	}
-	protected void connected() {
-		sendStatusNotification(MSG_CONNECTED);
-	}
-	protected void disconnected() {
-		sendStatusNotification(MSG_DISCONNECTED);
-	}
-	private void sendStatusNotification(int notification) {
+	private void sendStatusToActivity() {
+		int notification = MSG_DISCONNECTED;
+		switch (status) {
+		case STATUS_CONNECTED: notification = MSG_CONNECTED; break;
+		case STATUS_CONNECTING: notification = MSG_CONNECTING; break;
+		case STATUS_DISCONNECTED: notification = MSG_DISCONNECTED; break;
+		}
+		
 		Message msg = Message.obtain();
 		msg.what = notification;
 		try {
@@ -127,5 +146,31 @@ public abstract class Connector extends Service {
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		}
+	}
+
+	protected boolean isConnected() {
+		return status == Status.STATUS_CONNECTED;
+	}
+	protected boolean isDisConnected() {
+		return status == Status.STATUS_DISCONNECTED;
+	}
+	protected boolean isConnecting() {
+		return status == Status.STATUS_CONNECTING;
+	}
+	
+	/**
+	 * called from Connector on various events (status updates)
+	 */
+	protected void connecting() {
+		status = Status.STATUS_CONNECTING;
+		sendStatusToActivity();
+	}
+	protected void connected() {
+		status = Status.STATUS_CONNECTED;
+		sendStatusToActivity();
+	}
+	protected void disconnected() {
+		status = Status.STATUS_DISCONNECTED;
+		sendStatusToActivity();
 	}
 }

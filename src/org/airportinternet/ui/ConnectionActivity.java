@@ -54,7 +54,8 @@ public class ConnectionActivity extends Activity {
             switch (msg.what) {
             case Connector.MSG_SET_LOG:
             	tx.append(msg.obj.toString());
-            	Log.d("handle_msg", "append to TextArea: " + msg.obj);
+            	Log.d("ConnectionActivity:handleMsg",
+            			"append to TextArea: " + msg.obj);
                 break;
             case Connector.MSG_CONNECTED:
             	statusView.setText("Connected");
@@ -67,6 +68,11 @@ public class ConnectionActivity extends Activity {
             case Connector.MSG_DISCONNECTED:
             	statusView.setText("Disconnected");
             	statusView.setTextColor(android.graphics.Color.RED);
+            	break;
+            case Connector.MSG_STATUS_UPDATE:
+            	String text = (String)msg.obj;
+            	Log.d("ConnectionActivity:handleMsg","Received fullLog: "+text);
+            	tx.setText(text);
             	break;
             default:
             	Log.d("handleMessage", "got unknown message: " + msg);

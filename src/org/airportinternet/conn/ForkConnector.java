@@ -24,8 +24,6 @@ public class ForkConnector extends Connector {
 	private Process proc;
 	private BufferedReader in;
 
-	private StringBuilder fullLog = new StringBuilder();
-	
 	private List<String> cmdc;
 	
 	/*
@@ -87,10 +85,10 @@ public class ForkConnector extends Connector {
 				sendLog(ret.toString());
 				fullLog.append(ret);
 			}
-			if (!connected) {
-				connected = fullLog.lastIndexOf("setup complete, ") != -1;
-				if (connected) {
+			if (!isConnected()) {
+				if (fullLog.lastIndexOf("setup complete, ") != -1)
 					connected();
+				if (isConnected()) {
 					// TODO: set up routing
 					refreshEvery = 1000;
 				}
