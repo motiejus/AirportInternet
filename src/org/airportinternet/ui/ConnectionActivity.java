@@ -37,7 +37,7 @@ public class ConnectionActivity extends Activity {
     	btnStop = (Button)findViewById(R.id.stopButton);
     	
     	String stnName = getIntent().getExtras().getString("setting");
-    	Log.d("Starting Connection with setting: ", stnName);
+    	Log.d("Starting ConnectionActivity with setting ", stnName);
     	
     	Intent serviceIntent = new Intent(this, ForkConnector.class);
     	serviceIntent.putExtra("setting", stnName);

@@ -43,7 +43,7 @@ public abstract class Connector extends Service {
     public static final int MSG_REGISTER_CLIENT = 1;
     
 	private Messenger client;
-	private Setting setting;
+	private Setting setting = null;
 	
 	/* Connector appends to this log */
 	protected StringBuilder fullLog = new StringBuilder();
@@ -107,8 +107,14 @@ public abstract class Connector extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startid) {
     	String settingName = intent.getExtras().getString("setting");
-    	setting = Setting.getSettingByName(settingName,
-    			getApplicationContext());
+    	/* If setting is null, then we know that activity is started for the
+    	 * first time.
+    	 * 
+    	 * settingName can be null only if user is getting from notification.
+    	 * Therefore it can't happen that both setting and settingName are null
+    	 */
+    	setting = setting != null ? setting :
+    		Setting.getSettingByName(settingName, getApplicationContext());
     	return START_FLAG_REDELIVERY;
     }
     
