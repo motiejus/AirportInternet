@@ -64,6 +64,7 @@ public class ForkConnector extends Connector {
 		
 		watchdog = new Thread() {
 			public void run() {
+				Log.d("watchdog", "watchdog started, locking watchdogLock");
 				watchdogLock.lock();
 				try {
 					proc = new ProcessBuilder(cmdc).redirectErrorStream(
@@ -99,7 +100,6 @@ public class ForkConnector extends Connector {
 		try {
 			while(!watchDogStartedTheProcess)
 				watchdogCond.await();
-			watchDogStartedTheProcess = false; // for next iteration
 		} catch (InterruptedException e) {
 			// should never happen
 			e.printStackTrace();
@@ -115,7 +115,6 @@ public class ForkConnector extends Connector {
 		public void run() {
 			/* If executable failed to start */
 			if (in == null) {
-				Log.d("poller", "We assumed iodine binary failed to start");
 				running = false;
 				disconnected();
 				return;
@@ -135,7 +134,6 @@ public class ForkConnector extends Connector {
 				e.printStackTrace();
 			}
 			if (ret.length() > 0) {
-				Log.d("poller", "Just read from iodine: " + ret);
 				sendLog(ret.toString());
 			}
 			if (!isConnected()) {
@@ -146,12 +144,8 @@ public class ForkConnector extends Connector {
 					refreshEvery = 1000;
 				}
 			}
-    		if (running)
-    			mHandler.postDelayed(this, refreshEvery);
-    		else {
-    			Log.d("poller", "Not running, so disconnected");
-    			disconnected();
-    		}
+    		if (running) mHandler.postDelayed(this, refreshEvery);
+    		else disconnected();
 		}
 	};
 }
