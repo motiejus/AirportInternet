@@ -116,5 +116,31 @@ Enjoy!
 closing iodine. In 99.9% of the cases it doesn't change anything, since packets
 to DNS server go through default gateway anyway.
 
+Comments about C code
+---------------------
+
+As mentioned earlier, original `iodine` had to be patched. Here is the
+motivation.
+
+Warn, warnx, err, errx are BSD extensions to standard library which print
+logging messages to standard error. They do not exist in Android, so had to be
+re-implemented from scratch. In `iodine` implementation it used variadic
+arguments (`va_start_`, `va_list`, etc). However, using these functions for
+strings garbled the output. For that reason I reimplemented the functions above
+using macros directly to `fprintf` and `exit` commands.
+
+\newpage
+
+Screenshots
+-----------
+
+![Settings window](report/settings.png)
+
+![Error connecting](report/failure.png)
+
+![Connected](report/connected.png)
+
+![Notification](report/notification.png)
+
 [1]: http://code.kryo.se/iodine/
 [2]: https://github.com/Motiejus/iodine/commit/4601a23b31059290e30cae9996a1a833de9dbc3e
