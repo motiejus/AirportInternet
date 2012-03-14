@@ -78,8 +78,6 @@ public class ForkConnector extends Connector {
 					in = new BufferedReader(new InputStreamReader(
 							proc.getInputStream()));
 				} catch (IOException e) {
-					Toast.makeText(getApplicationContext(),
-							"Failed to start iodine", Toast.LENGTH_SHORT);
 					e.printStackTrace();
 					sendLog("Failed to start iodine");
 				}
@@ -155,10 +153,9 @@ public class ForkConnector extends Connector {
 				
 				if (isConnected()) {
 					Process routing = null;
-					// Ye, this is kinda dangerous
-					// (man in the middle could exploit this ... brrr)
 					String r = "su -c sh " + ROUTING_SCRIPT_PATH + 
 							" " + scriptParam;
+					Log.d("poller", "Routing invocation command: " + r);
 					try {
 						//routing = Runtime.getRuntime().exec("su", params);
 						routing = Runtime.getRuntime().exec(r);
@@ -175,6 +172,7 @@ public class ForkConnector extends Connector {
 					if (routing == null || routing.exitValue() != 0) {
 						sendLog("Routing configuration failed\n");
 					}
+					sendLog("Routing configuration complete");
 					refreshEvery = 1000;
 				}
 			}
