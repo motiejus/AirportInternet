@@ -12,6 +12,7 @@ import org.airportinternet.Setting;
 
 import android.os.Handler;
 import android.util.Log;
+import android.widget.Toast;
 
 public class ForkConnector extends Connector {
 	private static final String IODINE_PATH =
@@ -40,8 +41,7 @@ public class ForkConnector extends Connector {
 	
 	@Override
 	public void stop() {
-		if (proc != null)
-			proc.destroy();
+		proc.destroy();
 		try {
 			watchdog.join();
 		} catch (InterruptedException e) {
@@ -69,15 +69,16 @@ public class ForkConnector extends Connector {
 					in = new BufferedReader(new InputStreamReader(
 							proc.getInputStream()));
 				} catch (IOException e) {
-					sendLog("Failed to start iodine");
+					Toast.makeText(getApplicationContext(),
+							"Failed to start iodine", Toast.LENGTH_SHORT);
 					e.printStackTrace();
+					sendLog("Failed to start iodine");
 				}
 				watchdogCond.signal();
 				watchdogLock.unlock();
 
 				try {
-					if (proc != null) // if loaded successfully
-						proc.waitFor();
+					proc.waitFor();
 					running = false;
 				} catch (InterruptedException e) {
 					e.printStackTrace(); // shouldn't ever happen
@@ -98,19 +99,12 @@ public class ForkConnector extends Connector {
 		} finally {
 			watchdogLock.unlock();
 		}
-		running = true;
 		mHandler.post(poller);
+		running = true;
 	}
 
 	private Runnable poller = new Runnable() {
 		public void run() {
-			/* If executable failed to start */
-			if (in == null) {
-				running = false;
-				disconnected();
-				return;
-			}
-			
 			char buf[] = new char[1024];
 			StringBuilder ret = new StringBuilder();
 			int cnt = 0;
