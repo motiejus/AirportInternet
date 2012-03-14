@@ -187,7 +187,6 @@ public abstract class Connector extends Service {
 	}
 
 	private void sendStatusToActivity() {
-		/* Send status to notification */
 		if (client != null) {
 			int notification = MSG_DISCONNECTED;
 			switch (status) {
