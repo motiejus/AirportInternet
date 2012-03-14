@@ -117,4 +117,4 @@ closing iodine. In 99.9% of the cases it doesn't change anything, since packets
 to DNS server go through default gateway anyway.
 
 [1]: http://code.kryo.se/iodine/
-[2]: https://github.com/Motiejus/iodine
+[2]: https://github.com/Motiejus/iodine/commit/4601a23b31059290e30cae9996a1a833de9dbc3e
