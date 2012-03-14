@@ -187,10 +187,12 @@ public abstract class Connector extends Service {
 	}
 
 	private void sendStatusToActivity() {
-		/* Send status to notification */
-    	notification.setLatestEventInfo(getApplicationContext(),
-    			contentTitle, status2text(), contentIntent);
-    	mNM.notify(1, notification);
+		/* Send status to notification if not disconnected */
+		if (!status.equals(Status.STATUS_DISCONNECTED)) {
+			notification.setLatestEventInfo(getApplicationContext(),
+					contentTitle, status2text(), contentIntent);
+			mNM.notify(1, notification);
+		}
 		
 		Log.d("sendStatusNotification", "Status to activity: " + status);
 		if (client != null) {
