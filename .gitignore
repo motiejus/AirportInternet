@@ -6,3 +6,5 @@
 /jni
 /libs/
 /obj/
+/local.properties
+.*.swp
