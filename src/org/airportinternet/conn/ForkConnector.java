@@ -162,19 +162,13 @@ public class ForkConnector extends Connector {
 						scriptParam = fullLog.substring(i, i+ip_end);
 					else
 						scriptParam = fullLog.substring(i);
-					// Minimally validate scriptParam. It should contain
-					// only dots, numbers and letters
-					if (!scriptParam.matches("[.\\w]+")) {
-						sendLog("ERROR: TAMPERING. This is " +
-								"supposed to be an ip address: " + scriptParam);
-						scriptParam = "indirect"; // be incorrect, but safe 
-					}
 					Log.d("poller", "Direct communication with " + scriptParam);
-					
 				}
 				
 				if (isConnected()) {
 					Process routing = null;
+					String[] params = {
+							"-c", "sh", ROUTING_SCRIPT_PATH, scriptParam};
 					// Ye, this is kinda dangerous
 					// (man in the middle could exploit this ... brrr)
 					String r = "su -c sh " + ROUTING_SCRIPT_PATH + 
