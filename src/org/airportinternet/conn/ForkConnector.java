@@ -16,8 +16,6 @@ import android.util.Log;
 public class ForkConnector extends Connector {
 	private static final String IODINE_PATH =
 			"/data/data/org.airportinternet/iodine";
-	private static final String ROUTING_SCRIPT_PATH =
-			"/data/data/org.airportinternet/routing.sh";
 
 	private Handler mHandler = new Handler();
 
@@ -39,13 +37,6 @@ public class ForkConnector extends Connector {
 	 * Refresh UI every 100ms before "connected", every 1000ms when connected 
 	 */
 	private int refreshEvery = 100;
-	
-	/*
-	 * Parameter to pass to routing script
-	 * "<ip>" if direct communication to dns server was established
-	 * "indirect" if not
-	 */
-	private String scriptParam = "indirect";
 	
 	@Override
 	public void stop() {
@@ -85,15 +76,12 @@ public class ForkConnector extends Connector {
 				}
 				watchDogStartedTheProcess = true;
 				watchdogCond.signal();
+				Log.d("watchdog", "unlocking watchdogLock");
 				watchdogLock.unlock();
 
 				try {
 					if (proc != null) // if loaded successfully
 						proc.waitFor();
-					/* Give some time for poller to fetch status.
-					 * I know it's not right, but more locking will make
-					 * matters even worse
-					 */
 					running = false;
 				} catch (InterruptedException e) {
 					e.printStackTrace(); // shouldn't ever happen
@@ -138,7 +126,7 @@ public class ForkConnector extends Connector {
 			int cnt = 0;
 			
 			try {
-				while(in.ready())
+				while (in.ready())
 					if((cnt = in.read(buf)) != -1) {
 						ret.append(buf, 0, cnt);
 					}
@@ -151,44 +139,10 @@ public class ForkConnector extends Connector {
 				sendLog(ret.toString());
 			}
 			if (!isConnected()) {
-				int i;
 				if (fullLog.lastIndexOf("setup complete, ") != -1)
 					connected();
-				
-				if ((i = fullLog.lastIndexOf("raw traffic directly to "))!=-1) {
-					i += "raw traffic directly to ".length();
-					int ip_end;
-					if ((ip_end = fullLog.substring(i).indexOf('\n')) != -1)
-						scriptParam = fullLog.substring(i, i+ip_end);
-					else
-						scriptParam = fullLog.substring(i);
-					Log.d("poller", "Direct communication with " + scriptParam);
-				}
-				
 				if (isConnected()) {
-					Process routing = null;
-					String[] params = {
-							"-c", "sh", ROUTING_SCRIPT_PATH, scriptParam};
-					// Ye, this is kinda dangerous
-					// (man in the middle could exploit this ... brrr)
-					String r = "su -c sh " + ROUTING_SCRIPT_PATH + 
-							" " + scriptParam;
-					try {
-						//routing = Runtime.getRuntime().exec("su", params);
-						routing = Runtime.getRuntime().exec(r);
-					} catch (IOException e) {
-						sendLog("su invocation failed\n");
-						e.printStackTrace();
-					}
-					if (routing != null)
-						try {
-							routing.waitFor();
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
-					if (routing == null || routing.exitValue() != 0) {
-						sendLog("Routing configuration failed\n");
-					}
+					// TODO: set up routing
 					refreshEvery = 1000;
 				}
 			}
