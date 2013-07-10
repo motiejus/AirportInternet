@@ -1,3 +1,14 @@
+NOTICE
+======
+
+This project is obsolete and is unlikely to build/work on recent androids (4+
+is not tested). Please see MagicTunnel instead:
+
+http://www.magictunnel.net/download.php
+
+I did not try it myself, but got a recommendation from a person which was fed
+up trying to build AirportInternet and notified me.
+
 
 Iodine front-end for Android
 ============================
